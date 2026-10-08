@@ -1,0 +1,83 @@
+{% extends "layout_auth.html" %}
+{% block title %}Manage Rooms — HostelMS{% endblock %}
+{% block page_title %}Room Management{% endblock %}
+
+{% block content %}
+<!-- ── Header Bar ─────────────────────────────────────────────────────────── -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">{{ rooms|length }} rooms in system</p>
+    <a href="{{ url_for('admin.add_room') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Add Room
+    </a>
+</div>
+
+<!-- ── Rooms Table ───────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="roomsTable">
+            <thead>
+                <tr>
+                    <th>Room #</th>
+                    <th>Block</th>
+                    <th>Floor</th>
+                    <th>Type</th>
+                    <th>Price (₹)</th>
+                    <th>Capacity</th>
+                    <th>Occupants</th>
+                    <th>Status</th>
+                    <th>Amenities</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td class="fw-semibold">{{ room.room_number }}</td>
+                    <td><span class="badge bg-secondary">{{ room.block }}</span></td>
+                    <td>{{ room.floor }}</td>
+                    <td>
+                        <span class="badge
+                            {% if room.room_type == 'single' %}bg-info
+                            {% elif room.room_type == 'double' %}bg-primary
+                            {% else %}bg-purple{% endif %}">
+                            {{ room.room_type|capitalize }}
+                        </span>
+                    </td>
+                    <td>₹{{ "{:,.0f}".format(room.price) }}</td>
+                    <td>{{ room.capacity }}</td>
+                    <td>{{ room.current_occupants }} / {{ room.capacity }}</td>
+                    <td>
+                        {% if room.status == 'vacant' %}
+                        <span class="badge bg-success-subtle text-success">Vacant</span>
+                        {% else %}
+                        <span class="badge bg-danger-subtle text-danger">Occupied</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-muted">{{ room.amenities or '—' }}</small></td>
+                    <td class="text-end">
+                        <a href="{{ url_for('admin.edit_room', room_id=room.id) }}"
+                           class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('admin.delete_room', room_id=room.id) }}"
+                              class="d-inline" onsubmit="return confirm('Delete room {{ room.room_number }}?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not rooms %}
+                <tr>
+                    <td colspan="10" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No rooms found. Click "Add Room" to create one.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

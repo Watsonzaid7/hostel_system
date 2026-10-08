@@ -1,0 +1,90 @@
+{% extends "layout_auth.html" %}
+{% block title %}{{ action }} Room — HostelMS{% endblock %}
+{% block page_title %}{{ action }} Room{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST" novalidate id="roomForm">
+                    <div class="row g-3">
+                        <!-- Room Number -->
+                        <div class="col-md-6">
+                            <label for="room_number" class="form-label">Room Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="room_number" name="room_number"
+                                   value="{{ room.room_number if room else '' }}" placeholder="e.g. A101" required>
+                        </div>
+                        <!-- Block -->
+                        <div class="col-md-3">
+                            <label for="block" class="form-label">Block <span class="text-danger">*</span></label>
+                            <select class="form-select" id="block" name="block" required>
+                                <option value="">Select</option>
+                                {% for b in ['A', 'B', 'C', 'D'] %}
+                                <option value="{{ b }}" {% if room and room.block == b %}selected{% endif %}>{{ b }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Floor -->
+                        <div class="col-md-3">
+                            <label for="floor" class="form-label">Floor <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="floor" name="floor" min="0" max="10"
+                                   value="{{ room.floor if room else '' }}" required>
+                        </div>
+                        <!-- Room Type -->
+                        <div class="col-md-4">
+                            <label for="room_type" class="form-label">Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="room_type" name="room_type" required>
+                                <option value="">Select</option>
+                                {% for t in ['single', 'double', 'triple'] %}
+                                <option value="{{ t }}" {% if room and room.room_type == t %}selected{% endif %}>
+                                    {{ t|capitalize }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Price -->
+                        <div class="col-md-4">
+                            <label for="price" class="form-label">Price (₹/month) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="price" name="price" min="0" step="100"
+                                   value="{{ room.price|int if room else '' }}" required>
+                        </div>
+                        <!-- Capacity -->
+                        <div class="col-md-4">
+                            <label for="capacity" class="form-label">Capacity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="capacity" name="capacity" min="1" max="6"
+                                   value="{{ room.capacity if room else '' }}" required>
+                        </div>
+                        <!-- Status (only for Edit) -->
+                        {% if room %}
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="vacant" {% if room.status == 'vacant' %}selected{% endif %}>Vacant</option>
+                                <option value="occupied" {% if room.status == 'occupied' %}selected{% endif %}>Occupied</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                        <!-- Amenities -->
+                        <div class="col-12">
+                            <label for="amenities" class="form-label">Amenities</label>
+                            <input type="text" class="form-control" id="amenities" name="amenities"
+                                   value="{{ room.amenities if room else '' }}"
+                                   placeholder="Wi-Fi, AC, Bed, Table, Attached Bath">
+                            <div class="form-text">Comma-separated list of amenities.</div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i> {{ action }} Room
+                        </button>
+                        <a href="{{ url_for('admin.rooms') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

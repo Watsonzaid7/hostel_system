@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Login — HostelMS{% endblock %}
+
+{% block body %}
+<div class="auth-wrapper">
+    <!-- Flash messages -->
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="auth-card">
+            <!-- Brand header -->
+            <div class="text-center mb-4">
+                <div class="auth-logo">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h2 class="fw-bold mt-3">Welcome Back</h2>
+                <p class="text-muted">Sign in to Hostel Management System</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}" novalidate>
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email"
+                               placeholder="you@example.com" required>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+            </form>
+
+            <hr class="my-4">
+            <p class="text-center text-muted mb-0">
+                Don't have an account?
+                <a href="{{ url_for('register') }}" class="fw-semibold">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "layout_auth.html" %}
+{% block title %}Browse Rooms — HostelMS{% endblock %}
+{% block page_title %}Browse Available Rooms{% endblock %}
+
+{% block content %}
+<!-- ── Filters ────────────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('student.browse_rooms') }}" class="row g-3 align-items-end">
+            <!-- Block Filter -->
+            <div class="col-md-3">
+                <label for="block" class="form-label">Block</label>
+                <select class="form-select" id="block" name="block">
+                    <option value="">All Blocks</option>
+                    {% for b in ['A', 'B', 'C', 'D'] %}
+                    <option value="{{ b }}" {% if selected_block == b %}selected{% endif %}>Block {{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Type Filter -->
+            <div class="col-md-3">
+                <label for="type" class="form-label">Room Type</label>
+                <select class="form-select" id="type" name="type">
+                    <option value="">All Types</option>
+                    <option value="single" {% if selected_type == 'single' %}selected{% endif %}>Single</option>
+                    <option value="double" {% if selected_type == 'double' %}selected{% endif %}>Double</option>
+                    <option value="triple" {% if selected_type == 'triple' %}selected{% endif %}>Triple</option>
+                </select>
+            </div>
+            <!-- Max Price -->
+            <div class="col-md-3">
+                <label for="max_price" class="form-label">Max Price (₹)</label>
+                <input type="number" class="form-control" id="max_price" name="max_price"
+                       value="{{ selected_price|int if selected_price else '' }}" placeholder="e.g. 5000" min="0" step="500">
+            </div>
+            <!-- Submit -->
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <a href="{{ url_for('student.browse_rooms') }}" class="btn btn-outline-secondary" title="Clear filters">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── Room Grid ─────────────────────────────────────────────────────────── -->
+<div class="row g-4">
+    {% for room in rooms %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card room-card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <!-- Room header -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">Room {{ room.room_number }}</h5>
+                        <span class="badge bg-secondary me-1">Block {{ room.block }}</span>
+                        <span class="badge
+                            {% if room.room_type == 'single' %}bg-info
+                            {% elif room.room_type == 'double' %}bg-primary
+                            {% else %}bg-purple{% endif %}">
+                            {{ room.room_type|capitalize }}
+                        </span>
+                    </div>
+                    <div class="room-price">
+                        <span class="fs-5 fw-bold">₹{{ "{:,.0f}".format(room.price) }}</span>
+                        <small class="text-muted d-block">/month</small>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div class="row g-2 mb-3 small">
+                    <div class="col-6"><i class="bi bi-layers me-1"></i> Floor {{ room.floor }}</div>
+                    <div class="col-6"><i class="bi bi-people me-1"></i> {{ room.current_occupants }}/{{ room.capacity }} beds</div>
+                </div>
+
+                <!-- Amenities -->
+                {% if room.amenities %}
+                <div class="mb-3">
+                    {% for a in room.amenities.split(',') %}
+                    <span class="badge bg-light text-dark border me-1 mb-1">{{ a.strip() }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Request Button -->
+                {% if room.is_full %}
+                <button class="btn btn-secondary w-100" disabled>
+                    <i class="bi bi-x-circle me-1"></i> Room Full
+                </button>
+                {% else %}
+                <form method="POST" action="{{ url_for('student.request_room', room_id=room.id) }}" class="room-request-form" data-room="{{ room.room_number }}">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send me-1"></i> Request This Room
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not rooms %}
+    <div class="col-12">
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-house-door fs-1 d-block mb-2"></i>
+            <p class="mb-0">No rooms match your criteria. Try adjusting the filters.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "layout_auth.html" %}
+{% block title %}My Status — HostelMS{% endblock %}
+{% block page_title %}My Allocation Status{% endblock %}
+
+{% block content %}
+
+{% if approved and assigned_room %}
+<!-- ═══════ Assigned Room Details ═══════ -->
+<div class="card border-0 shadow-sm mb-4 border-start border-success border-4">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="status-icon-lg status-icon--approved">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-0">Room Allocated Successfully!</h5>
+                <span class="text-muted">You have been assigned to Room {{ assigned_room.room_number }}</span>
+            </div>
+        </div>
+
+        <div class="bg-light rounded-3 p-3 mb-3">
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">Room Number</small>
+                    <strong>{{ assigned_room.room_number }}</strong>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">Block & Floor</small>
+                    <strong>Block {{ assigned_room.block }} — Floor {{ assigned_room.floor }}</strong>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">Type</small>
+                    <strong>{{ assigned_room.room_type|capitalize }}</strong>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">Monthly Rent</small>
+                    <strong>₹{{ "{:,.0f}".format(assigned_room.price) }}</strong>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">Move-in Date</small>
+                    <strong>{{ approved.move_in_date.strftime('%d %b %Y') if approved.move_in_date else '—' }}</strong>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">Amenities</small>
+                    <strong>{{ assigned_room.amenities or '—' }}</strong>
+                </div>
+            </div>
+        </div>
+
+        {% if approved.remarks %}
+        <div class="alert alert-info py-2 mb-0">
+            <i class="bi bi-chat-left-text me-1"></i> <strong>Admin Remarks:</strong> {{ approved.remarks }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══════ Roommates ═══════ -->
+{% if roommates %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="fw-semibold mb-0"><i class="bi bi-people me-2"></i>Your Roommates</h5>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="row g-3">
+            {% for mate in roommates %}
+            <div class="col-md-6">
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                    <div class="avatar-circle avatar-circle--lg">{{ mate.name[0]|upper }}</div>
+                    <div>
+                        <div class="fw-semibold">{{ mate.name }}</div>
+                        <small class="text-muted">{{ mate.student_id }} • {{ mate.email }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- ═══════ Request History ═══════ -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="fw-semibold mb-0"><i class="bi bi-clock-history me-2"></i>Request History</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Room</th>
+                    <th>Block</th>
+                    <th>Type</th>
+                    <th>Requested On</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req.id }}</td>
+                    <td class="fw-semibold">{{ req.room.room_number }}</td>
+                    <td><span class="badge bg-secondary">{{ req.room.block }}</span></td>
+                    <td>{{ req.room.room_type|capitalize }}</td>
+                    <td>{{ req.request_date.strftime('%d %b %Y, %I:%M %p') }}</td>
+                    <td>
+                        {% if req.status == 'approved' %}
+                        <span class="badge bg-success">Approved</span>
+                        {% elif req.status == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                        {% else %}
+                        <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-muted">{{ req.remarks or '—' }}</small></td>
+                    <td>
+                        {% if req.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('student.cancel_request', req_id=req.id) }}"
+                              onsubmit="return confirm('Cancel this request?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not requests %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No requests yet. <a href="{{ url_for('student.browse_rooms') }}">Browse rooms</a> to get started.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

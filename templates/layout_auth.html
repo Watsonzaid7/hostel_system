@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!-- ═══════ AUTHENTICATED LAYOUT — sidebar + content ═══════ -->
+<div class="d-flex" id="wrapper">
+
+    <!-- ─── SIDEBAR ─────────────────────────────────────────────────── -->
+    <nav id="sidebar" class="sidebar d-flex flex-column">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <i class="bi bi-building"></i>
+            <span>HostelMS</span>
+        </div>
+
+        <!-- Navigation Links -->
+        <ul class="nav flex-column mt-2 flex-grow-1">
+            {% if current_user.role == 'admin' %}
+            <!-- Admin Nav -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+                   href="{{ url_for('admin.dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint and 'admin.room' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.rooms') }}">
+                    <i class="bi bi-door-open"></i> Rooms
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.students' %}active{% endif %}"
+                   href="{{ url_for('admin.students') }}">
+                    <i class="bi bi-people"></i> Students
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.requests_list' %}active{% endif %}"
+                   href="{{ url_for('admin.requests_list') }}">
+                    <i class="bi bi-envelope-paper"></i> Requests
+                </a>
+            </li>
+
+            {% else %}
+            <!-- Student Nav -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.dashboard' %}active{% endif %}"
+                   href="{{ url_for('student.dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.browse_rooms' %}active{% endif %}"
+                   href="{{ url_for('student.browse_rooms') }}">
+                    <i class="bi bi-search"></i> Browse Rooms
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'student.my_status' %}active{% endif %}"
+                   href="{{ url_for('student.my_status') }}">
+                    <i class="bi bi-clipboard-check"></i> My Status
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+
+        <!-- Bottom user info -->
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="avatar-circle">
+                    {{ current_user.name[0]|upper }}
+                </div>
+                <div class="overflow-hidden">
+                    <div class="fw-semibold text-truncate small">{{ current_user.name }}</div>
+                    <div class="text-muted" style="font-size:.7rem">{{ current_user.role|capitalize }}</div>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm w-100">
+                <i class="bi bi-box-arrow-left"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- ─── MAIN CONTENT ────────────────────────────────────────────── -->
+    <div id="page-content" class="flex-grow-1">
+        <!-- Top bar (mobile toggle + page title) -->
+        <nav class="topbar d-flex align-items-center">
+            <button class="btn btn-link d-lg-none me-2" id="sidebarToggle">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <h1 class="topbar-title mb-0">{% block page_title %}Dashboard{% endblock %}</h1>
+        </nav>
+
+        <!-- Flash messages -->
+        <div class="container-fluid px-4 pt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <i class="bi {% if category == 'success' %}bi-check-circle{% elif category == 'danger' %}bi-exclamation-triangle{% elif category == 'warning' %}bi-exclamation-circle{% else %}bi-info-circle{% endif %} me-1"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Page content block -->
+        <main class="container-fluid px-4 pb-5">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

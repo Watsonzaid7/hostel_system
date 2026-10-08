@@ -1,0 +1,105 @@
+{% extends "layout_auth.html" %}
+{% block title %}Admin Dashboard — HostelMS{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- ── Stat Cards ─────────────────────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+    <!-- Total Rooms -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-card--rooms">
+            <div class="stat-card__icon"><i class="bi bi-door-open"></i></div>
+            <div>
+                <div class="stat-card__value">{{ total_rooms }}</div>
+                <div class="stat-card__label">Total Rooms</div>
+            </div>
+        </div>
+    </div>
+    <!-- Occupied -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-card--occupied">
+            <div class="stat-card__icon"><i class="bi bi-person-fill-check"></i></div>
+            <div>
+                <div class="stat-card__value">{{ occupied_rooms }}</div>
+                <div class="stat-card__label">Occupied Rooms</div>
+            </div>
+        </div>
+    </div>
+    <!-- Vacant -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-card--vacant">
+            <div class="stat-card__icon"><i class="bi bi-door-closed"></i></div>
+            <div>
+                <div class="stat-card__value">{{ vacant_rooms }}</div>
+                <div class="stat-card__label">Vacant Rooms</div>
+            </div>
+        </div>
+    </div>
+    <!-- Pending Requests -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-card--pending">
+            <div class="stat-card__icon"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <div class="stat-card__value">{{ pending_reqs }}</div>
+                <div class="stat-card__label">Pending Requests</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Secondary Stats Row ───────────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-4">
+        <div class="stat-card stat-card--students">
+            <div class="stat-card__icon"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="stat-card__value">{{ total_students }}</div>
+                <div class="stat-card__label">Registered Students</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+        <div class="stat-card stat-card--approved">
+            <div class="stat-card__icon"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="stat-card__value">{{ approved_reqs }}</div>
+                <div class="stat-card__label">Approved Allocations</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+        <div class="stat-card stat-card--occupancy">
+            <div class="stat-card__icon"><i class="bi bi-bar-chart-line"></i></div>
+            <div>
+                <div class="stat-card__value">
+                    {% if total_rooms > 0 %}{{ ((occupied_rooms / total_rooms) * 100)|round|int }}%{% else %}0%{% endif %}
+                </div>
+                <div class="stat-card__label">Occupancy Rate</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Quick Actions ─────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="fw-semibold mb-0"><i class="bi bi-lightning-charge me-2"></i>Quick Actions</h5>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="d-flex flex-wrap gap-3">
+            <a href="{{ url_for('admin.add_room') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Add New Room
+            </a>
+            <a href="{{ url_for('admin.requests_list') }}" class="btn btn-warning">
+                <i class="bi bi-envelope-paper me-1"></i> View Requests
+                {% if pending_reqs > 0 %}
+                <span class="badge bg-dark ms-1">{{ pending_reqs }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('admin.students') }}" class="btn btn-info">
+                <i class="bi bi-people me-1"></i> View Students
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

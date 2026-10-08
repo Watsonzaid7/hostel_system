@@ -1,0 +1,124 @@
+{% extends "layout_auth.html" %}
+{% block title %}Allocation Requests — HostelMS{% endblock %}
+{% block page_title %}Allocation Requests{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="requestsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Student ID</th>
+                    <th>Room</th>
+                    <th>Block</th>
+                    <th>Requested On</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req.id }}</td>
+                    <td class="fw-semibold">{{ req.student.name }}</td>
+                    <td>{{ req.student.student_id }}</td>
+                    <td>{{ req.room.room_number }}</td>
+                    <td><span class="badge bg-secondary">{{ req.room.block }}</span></td>
+                    <td>{{ req.request_date.strftime('%d %b %Y, %I:%M %p') }}</td>
+                    <td>
+                        {% if req.status == 'approved' %}
+                        <span class="badge bg-success">Approved</span>
+                        {% elif req.status == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                        {% else %}
+                        <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-muted">{{ req.remarks or '—' }}</small></td>
+                    <td class="text-end">
+                        {% if req.status == 'pending' %}
+                        <!-- Approve / Reject with Remarks Modal -->
+                        <button class="btn btn-sm btn-outline-success me-1"
+                                data-bs-toggle="modal" data-bs-target="#approveModal{{ req.id }}" title="Approve">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal" data-bs-target="#rejectModal{{ req.id }}" title="Reject">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+
+                        <!-- ── Approve Modal ─────────────────────────────── -->
+                        <div class="modal fade" id="approveModal{{ req.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('admin.approve_request', req_id=req.id) }}">
+                                        <div class="modal-header bg-success text-white">
+                                            <h5 class="modal-title">Approve Request #{{ req.id }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body text-start">
+                                            <p>Approve <strong>{{ req.student.name }}</strong> for
+                                               Room <strong>{{ req.room.room_number }}</strong>?</p>
+                                            <label for="remarks_approve_{{ req.id }}" class="form-label">Remarks (optional)</label>
+                                            <textarea class="form-control" id="remarks_approve_{{ req.id }}"
+                                                      name="remarks" rows="2" placeholder="Any notes…"></textarea>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-check-lg me-1"></i> Approve
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Reject Modal ──────────────────────────────── -->
+                        <div class="modal fade" id="rejectModal{{ req.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('admin.reject_request', req_id=req.id) }}">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title">Reject Request #{{ req.id }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body text-start">
+                                            <p>Reject <strong>{{ req.student.name }}'s</strong> request for
+                                               Room <strong>{{ req.room.room_number }}</strong>?</p>
+                                            <label for="remarks_reject_{{ req.id }}" class="form-label">Reason / Remarks</label>
+                                            <textarea class="form-control" id="remarks_reject_{{ req.id }}"
+                                                      name="remarks" rows="2" placeholder="Reason for rejection…"></textarea>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="bi bi-x-lg me-1"></i> Reject
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <span class="text-muted small">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not requests %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No allocation requests yet.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
